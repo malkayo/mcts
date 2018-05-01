@@ -1,31 +1,33 @@
 import math
 import random
 from tree import *
-from environment import *
 
-CP = 0.1
+CP = 0
 DISCOUNT_RATE = 0.95
 MAX_UCT = 1e10
 BUDGET_LIMIT = 10
 
 
-def mctsSearch(s0):
+def mctsSearch(s0, env):
     # create root node
-    v0 = Node(None, s0, None)
+    v0 = Node(None, None, s0)
 
     budget = 0
     while budget < BUDGET_LIMIT:
         # selection + expansion
         # select or create a leaf node from the nodes
         # already contained within the search tree
-        vl = tree_policy(v0)
+        # print("tree policy")  # DEBUG
+        vl = tree_policy(v0, env)
 
         # simulation
         # play out the domain from a given non-terminal state
         # to produce a value estimate
-        delta = default_policy(s(vl))
+        # print("default policy")  # DEBUG
+        delta = default_policy(vl.state, env)
 
         # backpropagation
+        # print("backup")  # DEBUG
         backup(vl, delta)
 
         # increment budget counters
@@ -36,22 +38,22 @@ def mctsSearch(s0):
     return best_child(v0).action
 
 
-def tree_policy(v):
+def tree_policy(v, env):
     while not v.state.terminal:
         if v.is_not_fully_expanded():
-            return expand(v)
+            return expand(v, env)
         else:
             v = best_child(v)
     return v
 
 
-def expand(v):
+def expand(v, env):
     a = random.choice(v.available_actions)
 
     # add a new child to v
     s_child = env.act(v.state, a)
     a_child = a
-    v_child = v.add_child(s_child, a_child)
+    v_child = v.add_child(a_child, s_child)
 
     return v_child
 
@@ -61,13 +63,13 @@ def best_child(v):
     uct_values = []
 
     for v_child in v_children:
-        uct_value.append(get_uct(v, v_child))
-
+        uct_values.append(get_uct(v, v_child))
     # return the child with the max uct, random choice in the case of a tie
     max_uct = max(uct_values)
     max_children = [child for child, val in zip(
         v_children, uct_values) if val == max_uct]
-    v_children = random.choice(max_children)
+    result = random.choice(max_children)
+    return result
 
 
 def get_uct(v, v_child):
@@ -79,11 +81,12 @@ def get_uct(v, v_child):
                 math.sqrt(2 * math.log(v.nb_visits) / v_child.nb_visits))
 
 
-def default_policy(s):
-    while is_non_terminal(s):
-        a = choose_uniformly_random(possible_actions(s))
-        s_new = env.act(s, a)
-    return s_new.reward  # ???? why not use total discounted return?
+def default_policy(s, env):
+    state = s
+    while not state.terminal:
+        a = random.choice(state.available_actions)
+        state = env.act(s, a)
+    return state.reward  # ???? why not use total discounted return?
 
 
 def backup(v, delta):
