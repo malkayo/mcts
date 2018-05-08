@@ -10,8 +10,7 @@ class Node:
         self.nb_visits = 0  # number of times the node was visited
         self.q = 0  # uct value
 
-        self.available_actions = state.available_actions
-        self.untried_actions = self.available_actions
+        self.untried_actions = self.state.available_actions
         self.children = []  # visited children nodes
 
     def is_not_fully_expanded(self):
