@@ -4,32 +4,28 @@ from tree import *
 
 CP = 1
 MAX_UCT = 1e10
-BUDGET_LIMIT = 200
-DISCOUNT_RATE = 0.9
+BUDGET_LIMIT = 10
+DISCOUNT_RATE = 1
 
 
 def mctsSearch(s0):
 
     # create root node
     v0 = Node(parent=None, action=None, state=s0)
-    # v0.state.print_state()
     custom_budget = int(BUDGET_LIMIT * len(s0.available_actions))
     budget = 0
     while budget < custom_budget:
         # selection + expansion
         # select or create a leaf node from the nodes
         # already contained within the search tree
-        # print("tree policy")  # DEBUG
         vl = tree_policy(v0)
 
         # simulation
         # play out the domain from a given non-terminal state
         # to produce a value estimate
-        # print("default policy")  # DEBUG
         delta = default_policy(vl.state)
 
         # backpropagation
-        # print("backup")  # DEBUG
         backup(vl, delta)
 
         # increment budget counters
@@ -37,9 +33,6 @@ def mctsSearch(s0):
 
     # return the action that leads to the best child of
     # the root node v0
-    # v0.state.print_state()
-    # v0.print_children()
-    # print('tree depth {}'.format(best_child(v0).tree_depth()))
     return best_child(v0, 0).action
 
 
@@ -56,15 +49,7 @@ def expand(v):
     a = random.choice(v.untried_actions)
 
     # add a new child to v
-    s_1 = v.state.act(a)
-
-    # simulate random action from the other player
-    if s_1.terminal:
-        # we're done
-        s_child = s_1
-    else:
-        a_other = random.choice(s_1.available_actions)
-        s_child = s_1.act(a_other)
+    s_child = v.state.act(a)
 
     a_child = a
     v_child = v.add_child(a_child, s_child)
@@ -100,7 +85,7 @@ def default_policy(s):
     while not state.terminal:
         a = random.choice(state.available_actions)
         state = state.act(a)
-    return state.reward  # ???? why not use total discounted return?
+    return state.reward
 
 
 def backup(v, delta):

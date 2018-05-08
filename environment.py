@@ -95,14 +95,13 @@ def main():
         state_vector=initial_state_vector, current_player=MCTS_PLAYER)
 
     while not state.terminal:
-        # print("Main loop")  # DEBUG
         state.print_state()
 
         if state.current_player == MCTS_PLAYER:
             selected_action = mctsSearch(state)
         else:
-            # selected_action = random.choice(state.available_actions)
-            selected_action = input("Select action ({}): ".format(state.available_actions))
+            selected_action = random.choice(state.available_actions)
+            # selected_action = input("Select action ({}): ".format(state.available_actions))
 
         print("player {} chooses {}".format(
             state.current_player, selected_action))
@@ -114,10 +113,10 @@ def main():
 
 
 if __name__ == "__main__":
-    random.seed(1234)
+    random.seed(12345)
 
     reward_sum = 0.
-    nb_sim = 200
+    nb_sim = 1000
     for i in range(nb_sim):
         result = main()
         print("win or draw?: {}".format(result))
