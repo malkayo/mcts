@@ -28,8 +28,7 @@ class TicTacToeState:
 
         # indicates if state is terminal
         # reward received when reaching this state
-        self.terminal, self.reward = self.get_terminal_reward(
-            self.current_player)
+        self.terminal, self.reward = self.get_terminal_reward()
 
         # available actions from this state
         self.available_actions = self.available_actions()
@@ -43,7 +42,7 @@ class TicTacToeState:
 
     def act(self, action):
         # write down the chosen action to new state vector
-        new_state_vector = self.state_vector
+        new_state_vector = deepcopy(self.state_vector)
         new_state_vector[action] = self.current_player
 
         # switch players
@@ -57,7 +56,7 @@ class TicTacToeState:
 
         return next_state
 
-    def get_terminal_reward(self, player):
+    def get_terminal_reward(self):
         # return whether the state is terminal and the related reward
 
         terminal_configs = [(0, 1, 2), (3, 4, 5), (6, 7, 8), (0, 3, 6),
@@ -100,10 +99,10 @@ def main():
         state.print_state()
 
         if state.current_player == MCTS_PLAYER:
-            # if False:
-            selected_action = mctsSearch(deepcopy(state))
+            selected_action = mctsSearch(state)
         else:
-            selected_action = random.choice(state.available_actions)
+            # selected_action = random.choice(state.available_actions)
+            selected_action = input("Select action ({}): ".format(state.available_actions))
 
         print("player {} chooses {}".format(
             state.current_player, selected_action))
@@ -111,40 +110,16 @@ def main():
         state = state.act(selected_action)
     state.print_state()
 
-    # win = False
-    # if state.current_player == MCTS_PLAYER:
-    #     if state.reward > 0:
-    #         win = True
-    # else:
-    #     if state.reward < 0:
-    #         win = True
-
-    return state.reward > 0
+    return state.reward >= 0
 
 
 if __name__ == "__main__":
     random.seed(1234)
 
     reward_sum = 0.
-    nb_sim = 100
+    nb_sim = 200
     for i in range(nb_sim):
         result = main()
-        print("win?: {}".format(result))
+        print("win or draw?: {}".format(result))
         reward_sum += result
     print("average reward {}".format(reward_sum / nb_sim))
-
-
-# class Environment:
-#     def __init__(self):
-#         pass
-
-#     def available_actions():
-#         actions = []
-#         return actions
-
-#     def act(state, action):
-#         new_state_vector = None
-#         reward = None
-#         terminal_bool = False
-#         next_state = State(new_state_vector, reward, terminal_bool)
-#         return next_state

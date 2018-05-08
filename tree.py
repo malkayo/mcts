@@ -7,7 +7,7 @@ class Node:
         # state of the environment corresponding to this node
         self.state = state
 
-        self.nb_visits = 0  # number of times the node was visited
+        self.nb_visits = 0.  # number of times the node was visited
         self.q = 0  # uct value
 
         self.untried_actions = self.state.available_actions
@@ -19,13 +19,10 @@ class Node:
     def add_child(self, action, child_state):
         child = Node(self, action, child_state)
         self.children.append(child)
-
         self.untried_actions.remove(action)
-
         return child
 
     def tree_depth(self, counter=0):
-        print(self.state.state_vector)
         if self.state.terminal or not self.children:
             return counter + 1
         else:
@@ -33,3 +30,10 @@ class Node:
             for child in self.children:
                 depths.append(child.tree_depth(counter + 1))
             return max(depths)
+
+    def print_children(self):
+        print("print children")
+        for child in self.children:
+            child.state.print_state()
+            uct = child.q / child.nb_visits
+            print("uct value: {}".format(uct))
