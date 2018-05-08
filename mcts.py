@@ -1,14 +1,15 @@
 import math
 import random
 from tree import *
+from copy import deepcopy
 
-CP = 0
-DISCOUNT_RATE = 0.95
+CP = 0.5
 MAX_UCT = 1e10
-BUDGET_LIMIT = 10
+BUDGET_LIMIT = 1000
 
 
 def mctsSearch(s0, env):
+
     # create root node
     v0 = Node(None, None, s0)
 
@@ -35,6 +36,8 @@ def mctsSearch(s0, env):
 
     # return the action that leads to the best child of
     # the root node v0
+    best_child_visits = best_child(v0).nb_visits
+    print('nb visits of the best child {}'.format(best_child_visits))
     return best_child(v0).action
 
 

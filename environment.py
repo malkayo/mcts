@@ -1,7 +1,6 @@
 import random
-
 from mcts import mctsSearch
-from copy import deepcopy
+from copy import copy
 
 MCTS_PLAYER = 1
 
@@ -41,13 +40,18 @@ class Environment:
         return next_state
 
 
-class OXO(Environment):
+class TicTacToe(Environment):
     """ A state of the game, i.e. the game board.
             Squares in the board are in this arrangement
             012
             345
             678
-            where 0 = empty, 1 = player 1 (X), 2 = player 2 (O)
+            where 0 = empty, 1 = player 1 (X), 2 = player 1 (O)
+
+            According to
+            https://math.stackexchange.com/questions/2444744/probability-of-winning-tic-tac-toe-game/2444768#2444768
+            the probability of winning if player 1 is 0.58
+            this is useful during debugging with two random players
     """
 
     def __init__(self):
@@ -81,7 +85,8 @@ class OXO(Environment):
         available_actions = self.available_actions(new_state_vector)
         next_state = State(new_state_vector, reward,
                            terminal_bool, action, available_actions)
-        # switch player
+
+        # switch players
         if self.current_player == 1:
             self.current_player = 2
         else:
@@ -98,7 +103,8 @@ class OXO(Environment):
                             (1, 4, 7), (2, 5, 8), (0, 4, 8), (2, 4, 6)]
 
         for (x, y, z) in terminal_configs:
-            if (state_vector[x] == state_vector[y] == state_vector[z]):
+            if (state_vector[x] == state_vector[y] and
+                    state_vector[y] == state_vector[z]):
 
                 if state_vector[x] == 0:
                     pass
@@ -131,7 +137,7 @@ class OXO(Environment):
 
 
 def main():
-    env = OXO()  # define which kind of environment
+    env = TicTacToe()  # define which kind of environment
     state = env.initial_state  # set up initial state
 
     while not state.terminal:
@@ -139,7 +145,7 @@ def main():
         env.print_state(state.state_vector)
 
         if env.current_player == MCTS_PLAYER:
-            selected_action = mctsSearch(deepcopy(state), deepcopy(env))
+            selected_action = mctsSearch(state, copy(env))
         else:
             available_actions = env.available_actions(state.state_vector)
             selected_action = random.choice(available_actions)
@@ -150,14 +156,16 @@ def main():
         state = env.act(state, selected_action)
     env.print_state(state.state_vector)
 
-    return state.reward
+    return state.reward > 0
 
 
 if __name__ == "__main__":
+    random.seed(1234)
+
     reward_sum = 0.
-    nb_sim = 10
+    nb_sim = 100
     for i in range(nb_sim):
         result = main()
-        print("result:{}".format(result))
+        print("win?: {}".format(result))
         reward_sum += result
     print("average reward {}".format(reward_sum / nb_sim))
